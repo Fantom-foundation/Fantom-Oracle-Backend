@@ -23,7 +23,7 @@ func New() Cfg {
 
 	// define flags
 	flag.StringVar(&cfg.NodeRpc, "rpc", "/var/opera/lachesis/data/lachesis.ipc", "path to the Lachesis IPC/RPC interface")
-	flag.StringVar(&cfg.ModulesConfigPath, "cfg", "/var/opera/watchdog/modules.json", "path to the modules configuration JSON file")
+	flag.StringVar(&cfg.ModulesConfigPath, "cfg", "doc/config/modules.json", "path to the modules configuration JSON file")
 	flag.StringVar(&cfg.LogLevel, "log", "NOTICE", "level of the log, use one of the [CRITICAL, ERROR, WARNING, NOTICE, INFO, DEBUG]")
 	flag.Parse()
 
