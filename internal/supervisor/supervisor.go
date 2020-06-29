@@ -3,21 +3,29 @@
 package supervisor
 
 import (
+	"github.com/ethereum/go-ethereum/rpc"
 	"oracle-watchdog/internal/logger"
+	"sync"
 )
 
 // WatchdogSupervisor implements the
 type WatchdogSupervisor struct {
-	log     logger.Logger
-	oracles []Oracle
+	nodeRpcPath string
+	log         logger.Logger
+	client      *rpc.Client
+	oracles     []Oracle
+	sigClose    chan bool
+	waitGroup   sync.WaitGroup
 }
 
 // New creates new instance of the Supervisor.
-func New(log logger.Logger) Supervisor {
+func New(rpcPath string, log logger.Logger) Supervisor {
 	// make the watchdog
 	ws := WatchdogSupervisor{
-		log:     log,
-		oracles: make([]Oracle, 0),
+		log:         log,
+		nodeRpcPath: rpcPath,
+		oracles:     make([]Oracle, 0),
+		sigClose:    make(chan bool, 1),
 	}
 
 	return &ws
@@ -32,18 +40,57 @@ func (ws *WatchdogSupervisor) AddOracle(ora Oracle) {
 	ws.oracles = append(ws.oracles, ora)
 }
 
+// OracleStarted signals to supervisor about new running oracle.
+func (ws *WatchdogSupervisor) OracleStarted() {
+	ws.waitGroup.Add(1)
+}
+
+// OracleDone signals to supervisor about finished oracle.
+func (ws *WatchdogSupervisor) OracleDone() {
+	ws.waitGroup.Done()
+}
+
 // Run inits the supervisor modules and starts them to do their job.
 func (ws *WatchdogSupervisor) Log() logger.Logger {
 	return ws.log
 }
 
-// Run inits the supervisor modules and starts them to do their job.
-func (ws *WatchdogSupervisor) Run() {
-
-}
-
 // Terminate signals watchdog supervisor to stop all running modules
 // and finish their job.
 func (ws *WatchdogSupervisor) Terminate() {
+	// log the process
+	ws.log.Notice("supervisor is closing")
 
+	// signal all the oracles to close
+	for _, ora := range ws.oracles {
+		ora.Terminate()
+	}
+
+	// wait for all the oracles to signal termination
+	ws.waitGroup.Wait()
+
+	// signal myself to terminate
+	ws.sigClose <- true
+}
+
+// Run inits the supervisor modules and starts them to do their job.
+func (ws *WatchdogSupervisor) Run() {
+	// any modules to run?
+	if 0 == len(ws.oracles) {
+		ws.log.Error("no oracles defined, nothing to do")
+		return
+	}
+
+	defer func() {
+		// log the process
+		ws.log.Notice("supervisor closed")
+	}()
+
+	// start all the registered oracles
+	for _, ora := range ws.oracles {
+		ora.Run()
+	}
+
+	// wait patiently for the terminate signal
+	<-ws.sigClose
 }
