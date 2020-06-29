@@ -1,0 +1,5 @@
+{
+  "name": "BallotsFin",
+  "api_url": "http://crypto.vm.lan:16761/api",
+  "scan_delay": 300
+}

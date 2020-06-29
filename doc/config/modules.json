@@ -1,0 +1,8 @@
+{
+  "modules": [
+    {
+      "type": "ballot",
+      "cfg": "doc/config/ballot.json"
+    }
+  ]
+}

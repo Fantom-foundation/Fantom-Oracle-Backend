@@ -1,0 +1,8 @@
+{
+  "name": "Binance FTM-USDT Feed",
+  "api_point": "https://api.binance.com/api/v3/ticker/price?symbol=FTMUSDT",
+  "api_key": "",
+  "api_secret": "",
+  "pull_delay_milliseconds": 2000,
+  "write_barrier_pct": 2.0
+}
