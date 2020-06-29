@@ -11,7 +11,7 @@ import (
 const logAppName = `OperaWatchdog`
 
 // logFormat represents the predefined format of the log
-const logFormat = `%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s}%{color:reset} %{message}`
+const logFormat = `%{color}%{time:15:04:05.000} %{shortfunc} > %{level:.4s}%{color:reset} %{message}`
 
 // ApiLogger defines extended logger with generic no-level logging option
 type ApiLogger struct {
