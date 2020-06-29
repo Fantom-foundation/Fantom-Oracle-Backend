@@ -18,7 +18,7 @@ func main() {
 	log := logger.New(&cfg)
 
 	// setup the supervisor
-	sup := supervisor.New(log)
+	sup := supervisor.New(cfg.NodeRpc, log)
 	err := loadOracles(&cfg, sup)
 	if err != nil {
 		log.Critical("can not load oracles into the supervisor")
