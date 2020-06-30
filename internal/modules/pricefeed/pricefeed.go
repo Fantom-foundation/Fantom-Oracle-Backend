@@ -2,13 +2,20 @@
 // into a price oracle in the blockchain.
 package pricefeed
 
+//go:generate abigen --abi ./contract/oracle.abi --pkg pricefeed --type PriceFeedContract --out ./bridge.go
+
 import (
 	"encoding/json"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"io/ioutil"
 	"math"
+	"math/big"
 	"net/http"
 	"oracle-watchdog/internal/config"
 	"oracle-watchdog/internal/supervisor"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -21,7 +28,7 @@ import (
 //  5. repeats the process from #1
 
 // httpClientTimeout represents a max time we tolerate for Binance API request.
-const httpClientTimeout = time.Second * 1
+const httpClientTimeout = time.Second * 5
 
 // PriceOracle defines an oracle module for feeding
 // conversion rate between defined symbol pairs into
@@ -31,6 +38,7 @@ type PriceOracle struct {
 	sup          supervisor.Supervisor
 	http         http.Client
 	sigClose     chan bool
+	symbol       [32]byte
 	currentPrice float64
 }
 
@@ -43,10 +51,15 @@ func New(cfg *config.ModuleConfig, sup supervisor.Supervisor) (supervisor.Oracle
 		return nil, err
 	}
 
+	// prep fixed size symbol name for contract calls
+	var symbol [32]byte
+	copy(symbol[:], cf.Symbol)
+
 	// make the ballot oracle
 	pf := PriceOracle{
 		cfg:      cf,
 		sup:      sup,
+		symbol:   symbol,
 		http:     http.Client{Timeout: httpClientTimeout},
 		sigClose: make(chan bool, 1),
 	}
@@ -175,8 +188,9 @@ func (pro *PriceOracle) pullPrice() (float64, error) {
 
 	// prep price response container
 	var data struct {
-		Symbol string  `json:"symbol"`
-		Price  float64 `json:"price"`
+		Symbol   string  `json:"symbol"`
+		PriceStr string  `json:"price"`
+		Price    float64 `json:"-"`
 	}
 
 	// try to decode the data
@@ -185,13 +199,81 @@ func (pro *PriceOracle) pullPrice() (float64, error) {
 		return 0, err
 	}
 
+	// decode price from string
+	data.Price, err = strconv.ParseFloat(data.PriceStr, 64)
+	if err != nil {
+		pro.sup.Log().Errorf("can not parse price from API call; %s", err.Error())
+		return 0, err
+	}
+
 	// log and return the price
-	pro.sup.Log().Debugf("current %s price is %f", data.Symbol, data.Price)
+	pro.sup.Log().Debugf("current %s price is %0.18f", data.Symbol, data.Price)
 	return data.Price, nil
+}
+
+// transactor creates an authorized transactor for signed contract interactions.
+// The transactor uses local key storage and configured key secret for unlocking the storage.
+func (pro *PriceOracle) transactor() (*bind.TransactOpts, error) {
+	// read the key store
+	f, err := os.Open(pro.cfg.KeyStore)
+	if err != nil {
+		pro.sup.Log().Errorf("can not open key store; %s", err.Error())
+		return nil, err
+	}
+
+	// ensure proper cleanup
+	defer func() {
+		// make sure to close the opened key store file
+		if err := f.Close(); err != nil {
+			pro.sup.Log().Errorf("error closing key store; %s", err.Error())
+		}
+	}()
+
+	// create the transactor
+	tr, err := bind.NewTransactor(f, pro.cfg.KeySecret)
+	if err != nil {
+		pro.sup.Log().Errorf("can not create authorized signing transactor; %s", err.Error())
+		return nil, err
+	}
+
+	return tr, nil
 }
 
 // writePrice sends the new price into the on-chain Oracle smart contract.
 func (pro *PriceOracle) writePrice(price float64) {
 	// log action
-	pro.sup.Log().Debugf("updating %s on-chain price to %f", pro.cfg.Symbol, price)
+	pro.sup.Log().Debugf("updating %s on-chain price to %0.18f", pro.cfg.Symbol, price)
+
+	// calculate the target value
+	val, _ := new(big.Float).Mul(big.NewFloat(price), big.NewFloat(math.Pow10(18))).Int(nil)
+	if val.IsUint64() {
+		pro.sup.Log().Debugf("using value %d", val.Uint64())
+	}
+
+	// prep Eth client
+	eth := ethclient.NewClient(pro.sup.Lachesis())
+
+	// connect the contract
+	contract, err := NewPriceFeedContract(pro.cfg.Contract, eth)
+	if err != nil {
+		pro.sup.Log().Errorf("can not access pricefeed contract; %s", err.Error())
+		return
+	}
+
+	// prep the transactor
+	sig, err := pro.transactor()
+	if err != nil {
+		pro.sup.Log().Errorf("can not interact with the pricefeed contract; %s", err.Error())
+		return
+	}
+
+	// send the price
+	tx, err := contract.SetPrice(sig, pro.symbol, val)
+	if err != nil {
+		pro.sup.Log().Errorf("can not push new price to the contract; %s", err.Error())
+		return
+	}
+
+	// info about the price update TX
+	pro.sup.Log().Errorf("price of %s updated by tx %s", pro.cfg.Symbol, tx.Hash().String())
 }

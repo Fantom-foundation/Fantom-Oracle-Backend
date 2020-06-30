@@ -4,21 +4,23 @@ package pricefeed
 
 import (
 	"encoding/json"
+	"github.com/ethereum/go-ethereum/common"
 	"io/ioutil"
 )
 
 // PriceOracleConfig represents a configuration
 // of the Binance price feed oracle module.
 type PriceOracleConfig struct {
-	Name            string  `json:"name"`
-	Symbol          string  `json:"symbol"`
-	ApiUrl          string  `json:"api_point"`
-	ApiKey          string  `json:"api_key"`
-	ApiSecret       string  `json:"api_secret"`
-	KeyStore        string  `json:"keystore"`
-	KeySecret       string  `json:"key_secret"`
-	PullDelayMs     int64   `json:"pull_delay_milliseconds"`
-	WriteBarrierPct float64 `json:"write_barrier_pct"`
+	Name            string         `json:"name"`
+	Symbol          string         `json:"symbol"`
+	ApiUrl          string         `json:"api_point"`
+	ApiKey          string         `json:"api_key"`
+	ApiSecret       string         `json:"api_secret"`
+	Contract        common.Address `json:"contract"`
+	KeyStore        string         `json:"keystore"`
+	KeySecret       string         `json:"key_secret"`
+	PullDelayMs     int64          `json:"pull_delay_milliseconds"`
+	WriteBarrierPct float64        `json:"write_barrier_pct"`
 }
 
 // configuration loads and parses the Binance price feed oracle module configuration
