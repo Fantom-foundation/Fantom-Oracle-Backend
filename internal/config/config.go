@@ -11,7 +11,7 @@ type Cfg struct {
 	// ModulesConfigPath is the path to modules configuration JSON file.
 	ModulesConfigPath string
 
-	// LogLevel represents the level for log records of the watchdog.
+	// LogLevel represents the level for log records of the oracle.
 	LogLevel string
 }
 

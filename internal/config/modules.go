@@ -2,7 +2,7 @@
 package config
 
 // ModuleConfig defines a general structure for a configuration
-// of an oracle module supervised by the watchdog supervisor.
+// of an oracle module supervised by the oracle supervisor.
 type ModuleConfig struct {
 	Type    string `json:"type"`
 	CfgPath string `json:"cfg"`

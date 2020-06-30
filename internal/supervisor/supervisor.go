@@ -20,7 +20,7 @@ type WatchdogSupervisor struct {
 
 // New creates new instance of the Supervisor.
 func New(rpcPath string, log logger.Logger) Supervisor {
-	// make the watchdog
+	// make the oracle
 	ws := WatchdogSupervisor{
 		log:         log,
 		nodeRpcPath: rpcPath,
@@ -55,7 +55,7 @@ func (ws *WatchdogSupervisor) Log() logger.Logger {
 	return ws.log
 }
 
-// Terminate signals watchdog supervisor to stop all running modules
+// Terminate signals oracle supervisor to stop all running modules
 // and finish their job.
 func (ws *WatchdogSupervisor) Terminate() {
 	// log the process

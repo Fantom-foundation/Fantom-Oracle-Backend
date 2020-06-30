@@ -44,11 +44,11 @@ func setupSignals(sup supervisor.Supervisor, log logger.Logger) {
 		<-ts
 
 		// log and signal supervisor to close the business
-		log.Info("watchdog is terminating")
+		log.Info("oracle is terminating")
 		sup.Terminate()
 
 		// we are done here
-		log.Info("done, see you later")
+		log.Info("done")
 		os.Exit(0)
 	}()
 }
