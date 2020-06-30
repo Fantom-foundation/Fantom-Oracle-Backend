@@ -15,6 +15,8 @@ type FinalizingOracleConfig struct {
 	Name      string `json:"name"`
 	ApiUrl    string `json:"api_url"`
 	ScanDelay int64  `json:"scan_delay"`
+	KeyStore  string `json:"keystore"`
+	KeySecret string `json:"key_secret"`
 }
 
 // configuration loads and parses the ballot finalizing oracle module configuration

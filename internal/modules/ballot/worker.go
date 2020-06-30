@@ -51,7 +51,13 @@ type Participant struct {
 
 // NewWorker creates a new ballot oracle worker structure
 // ready to run ballots finalization.
-func NewWorker(rpc *ethclient.Client, api *graphql.Client, wg *sync.WaitGroup, queue chan ClosedBallot, log logger.Logger) *FinalizingWorker {
+func NewWorker(
+	rpc *ethclient.Client,
+	api *graphql.Client,
+	wg *sync.WaitGroup,
+	queue chan ClosedBallot,
+	log logger.Logger,
+) *FinalizingWorker {
 	// make the worker
 	w := FinalizingWorker{
 		eth:          rpc,
@@ -81,12 +87,12 @@ func (fw *FinalizingWorker) Run() {
 	fw.waitGroup.Add(1)
 
 	// execute me
-	go fw.execute()
+	go fw.waitForBallot()
 }
 
-// execute is the main worker routine where the actual worker
+// waitForBallot is the main worker routine where the actual worker
 // business happens.
-func (fw *FinalizingWorker) execute() {
+func (fw *FinalizingWorker) waitForBallot() {
 	// make sure to sign off when done
 	defer func() {
 		// log the action
@@ -110,34 +116,48 @@ func (fw *FinalizingWorker) execute() {
 			return
 		}
 
-		// connect the contract
-		contract, err := NewBallotContract(fw.ballot.Address, fw.eth)
-		if err != nil {
-			fw.log.Errorf("can not access ballot contract; %s", err.Error())
-			continue
+		// process the ballot
+		if err := fw.processBallot(); err != nil {
+			fw.log.Errorf("can not process ballot %s; %s", fw.ballot.Address.String(), err.Error())
 		}
-
-		// collect list of all participants of the ballot
-		party, err := fw.participants(contract)
-		if err != nil {
-			fw.log.Debugf("ballot processing error; %s", err.Error())
-			continue
-		}
-
-		// do we have any participants at all?
-		if party == nil || len(party) == 0 {
-			continue
-		}
-
-		// push participants data to the ballot contract
-
-		// finalize the ballot
 	}
+}
+
+// processBallot processes the received ballot and updates
+// the ballot data and status on chain.
+func (fw *FinalizingWorker) processBallot() error {
+	// connect the contract
+	contract, err := NewBallotContract(fw.ballot.Address, fw.eth)
+	if err != nil {
+		fw.log.Errorf("can not access ballot contract; %s", err.Error())
+		return err
+	}
+
+	// collect list of all participants of the ballot
+	party, err := fw.participants(contract)
+	if err != nil {
+		fw.log.Debugf("ballot processing error; %s", err.Error())
+		return err
+	}
+
+	// do we have any participants at all?
+	if party == nil || len(party) == 0 {
+		return nil
+	}
+
+	// push participants data to the ballot contract
+
+	// finalize the ballot
+
+	return nil
 }
 
 // participants collects all the participants of the ballot with their votes
 // so we can push the weights/totals into the contract and finalize it.
 func (fw *FinalizingWorker) participants(contract *BallotContract) ([]Participant, error) {
+	// inform
+	fw.log.Debugf("loading participants of %s", fw.ballot.Address.String())
+
 	// create the filter to iterate over the list
 	it, err := contract.FilterVoted(nil, []common.Address{fw.ballot.Address}, nil)
 	if err != nil {
@@ -150,6 +170,9 @@ func (fw *FinalizingWorker) participants(contract *BallotContract) ([]Participan
 		if err != nil {
 			fw.log.Errorf("failed to close votes iterator; %s", err.Error())
 		}
+
+		// inform
+		fw.log.Debugf("participants of %s loaded", fw.ballot.Address.String())
 	}()
 
 	// prep the list

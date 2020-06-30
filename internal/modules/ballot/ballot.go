@@ -36,11 +36,11 @@ query {
 
 // workersPoolSize represents the number of workers
 // waiting for the closed ballots to process them.
-const workersPoolSize = 5
+const workersPoolSize = 2
 
 // jobChannelBuffer represents the size of workers job channel
 // buffer.
-const jobChannelBuffer = 25
+const jobChannelBuffer = 10
 
 // FinalizingOracle defines an oracle module for feeding
 // ballot participants' account totals and finalizing
@@ -60,7 +60,7 @@ func New(cfg *config.ModuleConfig, sup supervisor.Supervisor) (supervisor.Oracle
 	// read the module configuration
 	cf, err := configuration(cfg.CfgPath)
 	if err != nil {
-		sup.Log().Criticalf("can not load finalizing oracle configuration %s; %s", cfg.CfgPath, err.Error())
+		sup.Log().Criticalf("can not load oracle configuration %s; %s", cfg.CfgPath, err.Error())
 		return nil, err
 	}
 
@@ -109,23 +109,23 @@ func (fo *FinalizingOracle) Run() {
 
 	// signal supervisor we are good to go
 	fo.sup.OracleStarted()
-	go fo.execute()
+	go fo.watchBallots()
 }
 
-// execute performs the finalizing oracle main function
+// watchBallots performs the finalizing oracle main function
 // by loading the ballots list and processing each of them
 // in a managed sub-routine.
-func (fo *FinalizingOracle) execute() {
+func (fo *FinalizingOracle) watchBallots() {
 	// signal the oracle has ended
 	defer func() {
 		// wait runners to finish
 		fo.workersGroup.Wait()
 
-		// signal supervisor we are done
-		fo.sup.OracleDone()
-
 		// log we are done
 		fo.sup.Log().Noticef("oracle %s terminated", fo.cfg.Name)
+
+		// signal supervisor we are done
+		fo.sup.OracleDone()
 	}()
 
 	// what delay do we wait before re-starting the scanner again
@@ -133,22 +133,8 @@ func (fo *FinalizingOracle) execute() {
 
 	// loop the function
 	for {
-		// log what we do
-		fo.sup.Log().Debugf("oracle %s starts ballots check", fo.cfg.Name)
-
-		// download closed ballots list
-		list, err := fo.listBallots()
-		if err != nil {
-			fo.sup.Log().Criticalf("can not get the list of closed ballots from API server; %s", err.Error())
-		}
-
-		// start finalizer for each of them received
-		if list != nil && len(list) > 0 {
-			for _, ba := range list {
-				// start new finalization runner for this ballot
-				fo.jobQueue <- ba
-			}
-		}
+		// check ballots and process them as needed
+		fo.checkBallots()
 
 		// wait for either termination signal, or timeout
 		select {
@@ -158,6 +144,26 @@ func (fo *FinalizingOracle) execute() {
 		case <-time.After(delay):
 			// we go around
 		}
+	}
+}
+
+// listBallots loads a list of closed and unfinished ballots from the API server
+// so they can be processed by this oracle.
+func (fo *FinalizingOracle) checkBallots() {
+	// log what we do
+	fo.sup.Log().Debugf("oracle %s starts ballots check", fo.cfg.Name)
+
+	// download closed ballots list
+	list, err := fo.listBallots()
+	if err != nil {
+		fo.sup.Log().Criticalf("can not get the list of closed ballots; %s", err.Error())
+		return
+	}
+
+	// finalize found ballots by pushing them into the work queue
+	// waiting workers will pull them and process them
+	for _, ba := range list {
+		fo.jobQueue <- ba
 	}
 }
 
