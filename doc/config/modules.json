@@ -3,6 +3,10 @@
     {
       "type": "ballot",
       "cfg": "doc/config/ballot.json"
+    },
+    {
+      "type": "pricefeed",
+      "cfg": "doc/config/ftm_usdt.json"
     }
   ]
 }
