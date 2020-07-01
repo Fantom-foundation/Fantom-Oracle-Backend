@@ -6,15 +6,14 @@ package pricefeed
 
 import (
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"io/ioutil"
 	"math"
 	"math/big"
 	"net/http"
 	"oracle-watchdog/internal/config"
+	"oracle-watchdog/internal/modules/utils"
 	"oracle-watchdog/internal/supervisor"
-	"os"
 	"strconv"
 	"time"
 )
@@ -207,36 +206,7 @@ func (pro *PriceOracle) pullPrice() (float64, error) {
 	}
 
 	// log and return the price
-	pro.sup.Log().Debugf("current %s price is %0.18f", data.Symbol, data.Price)
 	return data.Price, nil
-}
-
-// transactor creates an authorized transactor for signed contract interactions.
-// The transactor uses local key storage and configured key secret for unlocking the storage.
-func (pro *PriceOracle) transactor() (*bind.TransactOpts, error) {
-	// read the key store
-	f, err := os.Open(pro.cfg.KeyStore)
-	if err != nil {
-		pro.sup.Log().Errorf("can not open key store; %s", err.Error())
-		return nil, err
-	}
-
-	// ensure proper cleanup
-	defer func() {
-		// make sure to close the opened key store file
-		if err := f.Close(); err != nil {
-			pro.sup.Log().Errorf("error closing key store; %s", err.Error())
-		}
-	}()
-
-	// create the transactor
-	tr, err := bind.NewTransactor(f, pro.cfg.KeySecret)
-	if err != nil {
-		pro.sup.Log().Errorf("can not create authorized signing transactor; %s", err.Error())
-		return nil, err
-	}
-
-	return tr, nil
 }
 
 // writePrice sends the new price into the on-chain Oracle smart contract.
@@ -261,11 +231,14 @@ func (pro *PriceOracle) writePrice(price float64) {
 	}
 
 	// prep the transactor
-	sig, err := pro.transactor()
+	sig, err := utils.Transactor(pro.sup.Log(), &pro.cfg.KeyStore, &pro.cfg.KeySecret)
 	if err != nil {
 		pro.sup.Log().Errorf("can not interact with the pricefeed contract; %s", err.Error())
 		return
 	}
+
+	// info about the price update TX
+	pro.sup.Log().Debugf("updating price feed %s from address %s", pro.cfg.Symbol, sig.From.String())
 
 	// send the price
 	tx, err := contract.SetPrice(sig, pro.symbol, val)
@@ -275,5 +248,5 @@ func (pro *PriceOracle) writePrice(price float64) {
 	}
 
 	// info about the price update TX
-	pro.sup.Log().Errorf("price of %s updated by tx %s", pro.cfg.Symbol, tx.Hash().String())
+	pro.sup.Log().Infof("price of %s updated by tx %s", pro.cfg.Symbol, tx.Hash().String())
 }
