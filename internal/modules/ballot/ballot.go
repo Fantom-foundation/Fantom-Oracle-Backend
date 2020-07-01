@@ -30,6 +30,7 @@ query {
     ballotsClosed(finalized: false) {
         name
         address
+		proposals
     }
 }
 `
@@ -38,9 +39,8 @@ query {
 // waiting for the closed ballots to process them.
 const workersPoolSize = 2
 
-// jobChannelBuffer represents the size of workers job channel
-// buffer.
-const jobChannelBuffer = 10
+// jobChannelBuffer represents the size of workers job channel buffer.
+const jobChannelBuffer = 5
 
 // FinalizingOracle defines an oracle module for feeding
 // ballot participants' account totals and finalizing
@@ -103,7 +103,7 @@ func (fo *FinalizingOracle) Run() {
 	// make workers
 	fo.workers = make([]*FinalizingWorker, workersPoolSize)
 	for i := 0; i < workersPoolSize; i++ {
-		fo.workers[i] = NewWorker(eth, fo.apiClient, fo.workersGroup, fo.jobQueue, fo.sup.Log())
+		fo.workers[i] = NewWorker(eth, fo.apiClient, fo.workersGroup, fo.jobQueue, fo.sup.Log(), fo.cfg)
 		fo.workers[i].Run()
 	}
 

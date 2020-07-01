@@ -6,12 +6,16 @@ package ballot
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/machinebox/graphql"
+	"math"
+	"math/big"
 	"oracle-watchdog/internal/logger"
+	"oracle-watchdog/internal/modules/utils"
 	"sync"
 	"time"
 )
@@ -23,9 +27,14 @@ query ($addr: Address!) {
     }
 }`
 
+// participantsWeightPushPackSize represents the number of participants
+// pushed into the voting contract at once.
+const participantsWeightPushPackSize = 20
+
 // FinalizingWorker represents a worker structure and processor for single
 // closed ballot processing.
 type FinalizingWorker struct {
+	cfg          *FinalizingOracleConfig
 	eth          *ethclient.Client
 	api          *graphql.Client
 	sigTerminate chan bool
@@ -38,14 +47,16 @@ type FinalizingWorker struct {
 // ClosedBallot represents a ballot record received from the remote API server
 // and prepared to be finished by the oracle.
 type ClosedBallot struct {
-	Name    string         `json:"name"`
-	Address common.Address `json:"address"`
+	Name      string         `json:"name"`
+	Address   common.Address `json:"address"`
+	Proposals []string       `json:"proposals"`
 }
 
 // Participant represents a single address involved in the ballot voting.
 type Participant struct {
 	Address   common.Address
-	Total     hexutil.Big
+	Total     *big.Int
+	Vote      int
 	TimeStamp int64
 }
 
@@ -57,9 +68,11 @@ func NewWorker(
 	wg *sync.WaitGroup,
 	queue chan ClosedBallot,
 	log logger.Logger,
+	cfg *FinalizingOracleConfig,
 ) *FinalizingWorker {
 	// make the worker
 	w := FinalizingWorker{
+		cfg:          cfg,
 		eth:          rpc,
 		api:          api,
 		waitGroup:    wg,
@@ -141,14 +154,32 @@ func (fw *FinalizingWorker) processBallot() error {
 	}
 
 	// do we have any participants at all?
-	if party == nil || len(party) == 0 {
+	if party == nil {
+		fw.log.Noticef("nil voters received for %s", fw.ballot.Address.String())
 		return nil
 	}
 
+	// get the signing transactor
+	sig, err := utils.Transactor(fw.log, &fw.cfg.KeyStore, &fw.cfg.KeySecret)
+	if err != nil {
+		fw.log.Errorf("can not get push transactor; %s", err.Error())
+		return err
+	}
+
 	// push participants data to the ballot contract
+	if err := fw.pushVoters(contract, sig, party); err != nil {
+		fw.log.Debugf("can not push voters; %s", err.Error())
+		return err
+	}
 
 	// finalize the ballot
+	if err := fw.finalize(contract, sig); err != nil {
+		fw.log.Debugf("can not finalize ballot; %s", err.Error())
+		return err
+	}
 
+	// calculate and log the winner of the ballot
+	fw.winner(party)
 	return nil
 }
 
@@ -183,12 +214,15 @@ func (fw *FinalizingWorker) participants(contract *BallotContract) ([]Participan
 		// make the participant
 		party := Participant{
 			Address:   it.Event.Voter,
+			Vote:      int(it.Event.Vote.Uint64()),
 			Total:     fw.accountTotal(it.Event.Voter),
 			TimeStamp: time.Now().UTC().Unix(),
 		}
 
 		// push to the list
-		list = append(list, party)
+		if party.Total != nil {
+			list = append(list, party)
+		}
 
 		// check for possible termination request
 		select {
@@ -207,7 +241,7 @@ func (fw *FinalizingWorker) participants(contract *BallotContract) ([]Participan
 
 // accountTotal pulls the current total value of the given account
 // from remote API server using GraphQL call.
-func (fw *FinalizingWorker) accountTotal(addr common.Address) hexutil.Big {
+func (fw *FinalizingWorker) accountTotal(addr common.Address) *big.Int {
 	// log action
 	fw.log.Debugf("loading account total for [%s]", addr.String())
 
@@ -225,10 +259,122 @@ func (fw *FinalizingWorker) accountTotal(addr common.Address) hexutil.Big {
 	// execute the request and parse the response
 	if err := fw.api.Run(context.Background(), req, &res); err != nil {
 		fw.log.Errorf("can not pull account total for [%s]; %s", addr.String(), err.Error())
-		return hexutil.Big{}
+		return nil
 	}
 
 	// log the value
 	fw.log.Debugf("account total for [%s] is %s", addr.String(), res.Account.TotalValue.String())
-	return res.Account.TotalValue
+	return res.Account.TotalValue.ToInt()
+}
+
+// pushVoters updates the ballot voters information inside the contract
+// so the winner can be decided.
+func (fw *FinalizingWorker) pushVoters(contract *BallotContract, sig *bind.TransactOpts, party []Participant) error {
+	// inform
+	fw.log.Debugf("pushing %d voters stats into %s", len(party), fw.ballot.Address.String())
+
+	// prep the pack containers
+	voters := make([]common.Address, 0)
+	totals := make([]*big.Int, 0)
+	stamps := make([]*big.Int, 0)
+
+	// loop the whole party and each time build a pack to be pushed
+	var index int
+	for index < len(party) {
+		// add the participant to the pack
+		voters = append(voters, party[index].Address)
+		totals = append(totals, party[index].Total)
+		stamps = append(stamps, big.NewInt(party[index].TimeStamp))
+		index++
+
+		// if we reached the pack boundary, push the pack to contract
+		if len(voters) >= participantsWeightPushPackSize {
+			// make the push
+			if err := fw.pushPack(contract, sig, voters, totals, stamps); err != nil {
+				fw.log.Errorf("can not push a voters pack; %s", err.Error())
+				return err
+			}
+
+			// clear the pack so we can start again
+			voters = voters[:0]
+			totals = totals[:0]
+			stamps = stamps[:0]
+		}
+	}
+
+	// any remaining pack members left to process?
+	if 0 < len(voters) {
+		// make the last pack push
+		if err := fw.pushPack(contract, sig, voters, totals, stamps); err != nil {
+			fw.log.Errorf("can not push a voters pack; %s", err.Error())
+			return err
+		}
+	}
+
+	return nil
+}
+
+// pushPack uses the contract transaction call to make a push to the contract
+func (fw *FinalizingWorker) pushPack(contract *BallotContract, sig *bind.TransactOpts, voters []common.Address, totals []*big.Int, stamps []*big.Int) error {
+	// make a transaction
+	tx, err := contract.FeedWeights(sig, voters, totals, stamps)
+	if err != nil {
+		fw.log.Errorf("voters transaction failed; %s", err.Error())
+		return err
+	}
+
+	// inform
+	fw.log.Infof("voters pack fed into the ballot %s by %s", fw.ballot.Address.String(), tx.Hash().String())
+	return nil
+}
+
+// finalize locks the ballot in finished state and allows winner calculation.
+func (fw *FinalizingWorker) finalize(contract *BallotContract, sig *bind.TransactOpts) error {
+	// inform
+	fw.log.Debugf("finalizing ballot %s", fw.ballot.Address.String())
+
+	// invoke the finalize
+	tx, err := contract.Finalize(sig)
+	if err != nil {
+		fw.log.Errorf("can not finalize ballot %s; %s", fw.ballot.Address.String(), err.Error())
+		return err
+	}
+
+	// inform about success
+	fw.log.Infof("ballot %s has been finalized by %s", fw.ballot.Address.String(), tx.Hash().String())
+	return nil
+}
+
+// winner calculates the winning proposal of the ballot.
+func (fw *FinalizingWorker) winner(party []Participant) {
+	// inform
+	fw.log.Debugf("calculating ballot %s results", fw.ballot.Address.String())
+
+	// container for votes
+	votes := make([]uint64, len(party))
+
+	// container for weights
+	weights := make([]*big.Int, len(party))
+
+	// loop all voters
+	for _, voter := range party {
+		// advance votes counter
+		votes[voter.Vote]++
+
+		// make sure to list the weight
+		if weights[voter.Vote] == nil {
+			weights[voter.Vote] = new(big.Int)
+		}
+
+		// advance weight
+		weights[voter.Vote] = new(big.Int).Add(weights[voter.Vote], voter.Total)
+	}
+
+	// log results
+	for index, name := range fw.ballot.Proposals {
+		if weights[index] != nil {
+			w := new(big.Int).Div(weights[index], big.NewInt(int64(math.Pow10(18)))).Uint64()
+			fw.log.Noticef("%s: Proposal #%d %s, votes %d, weight %d FTM", fw.ballot.Name, index, name, votes[index], w)
+		}
+	}
 }
