@@ -30,7 +30,10 @@ query {
     ballotsClosed(finalized: false) {
         name
         address
-		proposals
+		proposals {
+			id
+			name
+		}
     }
 }
 `

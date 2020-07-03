@@ -49,7 +49,12 @@ type FinalizingWorker struct {
 type ClosedBallot struct {
 	Name      string         `json:"name"`
 	Address   common.Address `json:"address"`
-	Proposals []string       `json:"proposals"`
+	Proposals []Proposal     `json:"proposals"`
+}
+
+type Proposal struct {
+	Id   int32  `json:"id"`
+	Name string `json:"name"`
 }
 
 // Participant represents a single address involved in the ballot voting.
@@ -324,7 +329,7 @@ func (fw *FinalizingWorker) pushPack(contract *BallotContract, sig *bind.Transac
 	}
 
 	// inform
-	fw.log.Infof("voters pack fed into the ballot %s by %s", fw.ballot.Address.String(), tx.Hash().String())
+	fw.log.Infof("voters pack for %s sent as %s", fw.ballot.Address.String(), tx.Hash().String())
 	return nil
 }
 
@@ -351,10 +356,10 @@ func (fw *FinalizingWorker) winner(party []Participant) {
 	fw.log.Debugf("calculating ballot %s results", fw.ballot.Address.String())
 
 	// container for votes
-	votes := make([]uint64, len(party))
+	votes := make([]uint64, len(fw.ballot.Proposals)+1)
 
 	// container for weights
-	weights := make([]*big.Int, len(party))
+	weights := make([]*big.Int, len(fw.ballot.Proposals)+1)
 
 	// loop all voters
 	for _, voter := range party {
@@ -371,10 +376,11 @@ func (fw *FinalizingWorker) winner(party []Participant) {
 	}
 
 	// log results
-	for index, name := range fw.ballot.Proposals {
-		if weights[index] != nil {
-			w := new(big.Int).Div(weights[index], big.NewInt(int64(math.Pow10(18)))).Uint64()
-			fw.log.Noticef("%s: Proposal #%d %s, votes %d, weight %d FTM", fw.ballot.Name, index, name, votes[index], w)
+	for _, prop := range fw.ballot.Proposals {
+		// do we have it?
+		if weights[prop.Id] != nil {
+			w := new(big.Int).Div(weights[prop.Id], big.NewInt(int64(math.Pow10(18)))).Uint64()
+			fw.log.Noticef("%s: Proposal #%d %s, votes %d, weight %d FTM", fw.ballot.Name, prop.Id, prop.Name, votes[prop.Id], w)
 		}
 	}
 }

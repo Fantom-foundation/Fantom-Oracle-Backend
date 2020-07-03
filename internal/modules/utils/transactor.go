@@ -9,7 +9,7 @@ import (
 )
 
 // transactionsGasLimit is the limit of gas applied to a transaction call by default.
-const transactionsGasLimit = 1000000
+const transactionsGasLimit = 2000000
 
 // transactor creates a new Transactor object for communicating
 // with on-chain smart transactions via signed transactions.
