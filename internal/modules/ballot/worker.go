@@ -29,7 +29,7 @@ query ($addr: Address!) {
 
 // participantsWeightPushPackSize represents the number of participants
 // pushed into the voting contract at once.
-const participantsWeightPushPackSize = 20
+const participantsWeightPushPackSize = 10
 
 // FinalizingWorker represents a worker structure and processor for single
 // closed ballot processing.
