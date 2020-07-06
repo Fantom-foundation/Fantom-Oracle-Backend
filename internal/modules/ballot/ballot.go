@@ -22,14 +22,37 @@ import (
 //  3. uses TRX to populate ballot contracts with the accounts' totals
 //  4. uses TRX to finalize ballots
 //  5. waits certain amount of time to repeat the process from #1
+// Separated process of the ballot modules does:
+//  1. downloads list of currently active ballots from the API server
+//  2. collects total value of participant's accounts for each ballot
+//  3. calculates rolling winner of each ballot
+//  4. report the winner to an external API web hook as a JSON POST
+//  5. waits certain amount of time and repeat the process from #1
 
-// graphQLBallotsListQuery represents a GraphQL query to API server for
+// graphQLClosedBallotsListQuery represents a GraphQL query to API server for
 // loading list of closed and unfinished ballots.
-const graphQLBallotsListQuery = `
+const graphQLClosedBallotsListQuery = `
 query {
     ballotsClosed(finalized: false) {
         name
         address
+		isOpen
+		proposals {
+			id
+			name
+		}
+    }
+}
+`
+
+// graphQLOpenBallotsListQuery represents a GraphQL query to API server for
+// loading list of currently open and active ballots.
+const graphQLOpenBallotsListQuery = `
+query {
+    ballotsActive() {
+        name
+        address
+		isOpen
 		proposals {
 			id
 			name
@@ -55,7 +78,7 @@ type FinalizingOracle struct {
 	workers      []*FinalizingWorker
 	workersGroup *sync.WaitGroup
 	sigClose     chan bool
-	jobQueue     chan ClosedBallot
+	jobQueue     chan Ballot
 }
 
 // New creates a new instance of the ballot oracle module.
@@ -74,7 +97,7 @@ func New(cfg *config.ModuleConfig, sup supervisor.Supervisor) (supervisor.Oracle
 		apiClient:    graphql.NewClient(cf.ApiUrl),
 		workersGroup: new(sync.WaitGroup),
 		sigClose:     make(chan bool, 1),
-		jobQueue:     make(chan ClosedBallot, jobChannelBuffer),
+		jobQueue:     make(chan Ballot, jobChannelBuffer),
 	}
 
 	// make sure to add this oracle to the supervisor
@@ -112,18 +135,13 @@ func (fo *FinalizingOracle) Run() {
 
 	// signal supervisor we are good to go
 	fo.sup.OracleStarted()
-	go fo.watchBallots()
+	go fo.manageWatchers()
 }
 
-// watchBallots performs the finalizing oracle main function
-// by loading the ballots list and processing each of them
-// in a managed sub-routine.
-func (fo *FinalizingOracle) watchBallots() {
+// manageWatchers starts ballot watchers and manages their lifetime.
+func (fo *FinalizingOracle) manageWatchers() {
 	// signal the oracle has ended
 	defer func() {
-		// wait runners to finish
-		fo.workersGroup.Wait()
-
 		// log we are done
 		fo.sup.Log().Noticef("oracle %s terminated", fo.cfg.Name)
 
@@ -131,37 +149,71 @@ func (fo *FinalizingOracle) watchBallots() {
 		fo.sup.OracleDone()
 	}()
 
-	// what delay do we wait before re-starting the scanner again
-	var delay = time.Duration(fo.cfg.ScanDelay) * time.Second
+	// create local closing signal channels for manager watchers
+	sigCloseWatcher := make(chan bool, 2)
+	watchersGroup := new(sync.WaitGroup)
+
+	// run watchers
+	go fo.watchBallots(graphQLClosedBallotsListQuery, fo.cfg.ScanClosedDelay, watchersGroup, sigCloseWatcher)
+	go fo.watchBallots(graphQLOpenBallotsListQuery, fo.cfg.ScanActiveDelay, watchersGroup, sigCloseWatcher)
+
+	// wait for the master close signal
+	<-fo.sigClose
+
+	// signal watchers to terminate
+	sigCloseWatcher <- true
+	sigCloseWatcher <- true
+
+	// wait the watchers to notify they are done
+	watchersGroup.Wait()
+}
+
+// watchBallots performs the oracle watcher function
+// for checking and processing specified ballots group.
+func (fo *FinalizingOracle) watchBallots(pullQuery string, delay int64, group *sync.WaitGroup, terminator chan bool) {
+	// inform the watchers group this watcher entered the game
+	group.Add(1)
+
+	// signal the oracle has ended
+	defer func() {
+		// log we are done
+		fo.sup.Log().Noticef("oracle %s watcher terminated", fo.cfg.Name)
+
+		// signal manager that this watcher is done
+		group.Done()
+	}()
 
 	// loop the function
 	for {
-		// check ballots and process them as needed
-		fo.checkBallots()
+		// check closed ballots and process them as needed
+		fo.checkBallots(pullQuery)
 
 		// wait for either termination signal, or timeout
 		select {
-		case <-fo.sigClose:
+		case <-terminator:
 			// stop signal received?
 			return
-		case <-time.After(delay):
-			// we go around
+		case <-time.After(time.Duration(delay) * time.Second):
+			// repeat the action
 		}
 	}
 }
 
-// listBallots loads a list of closed and unfinished ballots from the API server
+// checkClosedBallots loads a list of closed and unfinished ballots from the API server
 // so they can be processed by this oracle.
-func (fo *FinalizingOracle) checkBallots() {
+func (fo *FinalizingOracle) checkBallots(query string) {
 	// log what we do
 	fo.sup.Log().Debugf("oracle %s starts ballots check", fo.cfg.Name)
 
 	// download closed ballots list
-	list, err := fo.listBallots()
+	list, err := fo.listBallots(query)
 	if err != nil {
-		fo.sup.Log().Criticalf("can not get the list of closed ballots; %s", err.Error())
+		fo.sup.Log().Criticalf("can not get the list of ballots; %s", err.Error())
 		return
 	}
+
+	// log what we do
+	fo.sup.Log().Debugf("oracle %s ballots check found %d ballots", fo.cfg.Name, len(list))
 
 	// finalize found ballots by pushing them into the work queue
 	// waiting workers will pull them and process them
@@ -172,20 +224,27 @@ func (fo *FinalizingOracle) checkBallots() {
 
 // listBallots loads a list of closed and unfinished ballots from the API server
 // so they can be processed by this oracle.
-func (fo *FinalizingOracle) listBallots() ([]ClosedBallot, error) {
+func (fo *FinalizingOracle) listBallots(query string) ([]Ballot, error) {
 	// prep new ballots list query
-	req := graphql.NewRequest(graphQLBallotsListQuery)
+	req := graphql.NewRequest(query)
 
 	// prep response container
 	var res struct {
-		BallotsClosed []ClosedBallot
+		BallotsClosed []Ballot
+		BallotsActive []Ballot
 	}
 
 	// execute the query and get the result
 	if err := fo.apiClient.Run(context.Background(), req, &res); err != nil {
-		fo.sup.Log().Errorf("closed ballots list API query failed; %s", err.Error())
+		fo.sup.Log().Errorf("ballots list API query failed; %s", err.Error())
 		return nil, err
 	}
 
+	// do we have any active ballots?
+	if 0 < len(res.BallotsActive) {
+		return res.BallotsActive, nil
+	}
+
+	// return closed ballots instead
 	return res.BallotsClosed, nil
 }

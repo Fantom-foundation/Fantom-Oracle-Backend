@@ -1,7 +1,9 @@
 {
   "name": "BallotsFin",
   "api_url": "http://crypto.vm.lan:16761/api",
-  "scan_delay": 3600,
+  "scan_closed_delay": 3600,
   "keystore": "",
-  "key_secret": ""
+  "key_secret": "",
+  "scan_active_delay": 86400,
+  "results_web_hook": ""
 }

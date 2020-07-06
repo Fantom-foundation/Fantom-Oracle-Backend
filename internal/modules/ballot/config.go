@@ -12,11 +12,13 @@ import (
 // FinalizingOracleConfig represents a configuration
 // of the ballot finalizing oracle module.
 type FinalizingOracleConfig struct {
-	Name      string `json:"name"`
-	ApiUrl    string `json:"api_url"`
-	ScanDelay int64  `json:"scan_delay"`
-	KeyStore  string `json:"keystore"`
-	KeySecret string `json:"key_secret"`
+	Name            string `json:"name"`
+	ApiUrl          string `json:"api_url"`
+	ScanClosedDelay int64  `json:"scan_closed_delay"`
+	KeyStore        string `json:"keystore"`
+	KeySecret       string `json:"key_secret"`
+	ScanActiveDelay int64  `json:"scan_active_delay"`
+	ResultsWebHook  string `json:"results_web_hook"`
 }
 
 // configuration loads and parses the ballot finalizing oracle module configuration

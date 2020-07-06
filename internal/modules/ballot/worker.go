@@ -5,7 +5,10 @@
 package ballot
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -14,8 +17,10 @@ import (
 	"github.com/machinebox/graphql"
 	"math"
 	"math/big"
+	"net/http"
 	"oracle-watchdog/internal/logger"
 	"oracle-watchdog/internal/modules/utils"
+	"strings"
 	"sync"
 	"time"
 )
@@ -39,16 +44,17 @@ type FinalizingWorker struct {
 	api          *graphql.Client
 	sigTerminate chan bool
 	waitGroup    *sync.WaitGroup
-	jobQueue     chan ClosedBallot
+	jobQueue     chan Ballot
 	log          logger.Logger
-	ballot       *ClosedBallot
+	ballot       *Ballot
 }
 
-// ClosedBallot represents a ballot record received from the remote API server
+// Ballot represents a ballot record received from the remote API server
 // and prepared to be finished by the oracle.
-type ClosedBallot struct {
+type Ballot struct {
 	Name      string         `json:"name"`
 	Address   common.Address `json:"address"`
+	IsOpen    bool           `json:"isOpen"`
 	Proposals []Proposal     `json:"proposals"`
 }
 
@@ -71,7 +77,7 @@ func NewWorker(
 	rpc *ethclient.Client,
 	api *graphql.Client,
 	wg *sync.WaitGroup,
-	queue chan ClosedBallot,
+	queue chan Ballot,
 	log logger.Logger,
 	cfg *FinalizingOracleConfig,
 ) *FinalizingWorker {
@@ -164,27 +170,42 @@ func (fw *FinalizingWorker) processBallot() error {
 		return nil
 	}
 
-	// get the signing transactor
-	sig, err := utils.Transactor(fw.log, &fw.cfg.KeyStore, &fw.cfg.KeySecret)
-	if err != nil {
-		fw.log.Errorf("can not get push transactor; %s", err.Error())
+	// process ballot closing
+	if err := fw.processClosed(contract, party); err != nil {
 		return err
 	}
 
-	// push participants data to the ballot contract
-	if err := fw.pushVoters(contract, sig, party); err != nil {
-		fw.log.Debugf("can not push voters; %s", err.Error())
-		return err
-	}
-
-	// finalize the ballot
-	if err := fw.finalize(contract, sig); err != nil {
-		fw.log.Debugf("can not finalize ballot; %s", err.Error())
-		return err
-	}
-
-	// calculate and log the winner of the ballot
+	// calculate and report the winner of the ballot
 	fw.winner(party)
+	return nil
+}
+
+// processClosed performs finalizing actions on the ballot.
+func (fw *FinalizingWorker) processClosed(contract *BallotContract, party []Participant) error {
+	// do the weight feed for closed ballots only
+	if !fw.ballot.IsOpen {
+		// log what we do
+		fw.log.Debugf("finalizing ballot %s", fw.ballot.Name)
+
+		// get the signing transactor
+		sig, err := utils.Transactor(fw.log, &fw.cfg.KeyStore, &fw.cfg.KeySecret)
+		if err != nil {
+			fw.log.Errorf("can not get push transactor; %s", err.Error())
+			return err
+		}
+
+		// push participants data to the ballot contract
+		if err := fw.pushVoters(contract, sig, party); err != nil {
+			fw.log.Debugf("can not push voters; %s", err.Error())
+			return err
+		}
+
+		// finalize the ballot
+		if err := fw.finalize(contract, sig); err != nil {
+			fw.log.Debugf("can not finalize ballot; %s", err.Error())
+			return err
+		}
+	}
 	return nil
 }
 
@@ -375,12 +396,74 @@ func (fw *FinalizingWorker) winner(party []Participant) {
 		weights[voter.Vote] = new(big.Int).Add(weights[voter.Vote], voter.Total)
 	}
 
+	// make a new string builder for generating the rolling/final results
+	var sb strings.Builder
+	if fw.ballot.IsOpen {
+		// add the header
+		sb.WriteString(fmt.Sprintf("Rolling results for ballot '%s':\n", fw.ballot.Name))
+	} else {
+		// add the header
+		sb.WriteString(fmt.Sprintf("Final results for ballot '%s':\n", fw.ballot.Name))
+	}
+
 	// log results
 	for _, prop := range fw.ballot.Proposals {
 		// do we have it?
 		if weights[prop.Id] != nil {
 			w := new(big.Int).Div(weights[prop.Id], big.NewInt(int64(math.Pow10(18)))).Uint64()
-			fw.log.Noticef("%s: Proposal #%d %s, votes %d, weight %d FTM", fw.ballot.Name, prop.Id, prop.Name, votes[prop.Id], w)
+			sb.WriteString(fmt.Sprintf("\tProposal #%d %s: votes %d, weight %d FTM\n", prop.Id, prop.Name, votes[prop.Id], w))
 		}
+	}
+
+	// post the results with configured web hook
+	fw.postResults(sb.String())
+
+	// log the result
+	fw.log.Notice(sb.String())
+}
+
+// postResults sends the calculated results to a configured web hook.
+func (fw *FinalizingWorker) postResults(result string) {
+	// do we have a hook
+	if 0 == len(fw.cfg.ResultsWebHook) {
+		return
+	}
+
+	// prep the result feed structure
+	var res struct {
+		Text string `json:"text"`
+	}
+	res.Text = result
+
+	// prep JSON data feed from the structure
+	data, err := json.Marshal(res)
+	if err != nil {
+		fw.log.Errorf("can not create a JSON data feed; %s", err.Error())
+		return
+	}
+
+	// create the HTTP request
+	req, err := http.NewRequest("POST", fw.cfg.ResultsWebHook, bytes.NewBuffer(data))
+	if err != nil {
+		fw.log.Errorf("can not create a POST request for the web hook; %s", err.Error())
+		return
+	}
+
+	// set request details
+	req.Header.Set("Content-Type", "application/json")
+
+	// make the client
+	client := &http.Client{}
+
+	// perform the post request; we don't really care about the response
+	response, err := client.Do(req)
+	if err != nil {
+		fw.log.Errorf("can not create perform the web hook call; %s", err.Error())
+		return
+	}
+
+	// close the response right away
+	if err := response.Body.Close(); err != nil {
+		fw.log.Errorf("error closing web hook call response body; %s", err.Error())
 	}
 }
