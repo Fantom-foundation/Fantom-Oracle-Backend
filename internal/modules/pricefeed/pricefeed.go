@@ -137,8 +137,11 @@ func (pro *PriceOracle) checkPrice() {
 	// we always use positive delta percentage since we only need an absolute value
 	var pct = 100.0
 	if pro.currentPrice != 0 {
-		pct = math.Abs(price-pro.currentPrice) / pro.currentPrice
+		pct = (math.Abs(price-pro.currentPrice) / pro.currentPrice) * 100.0
 	}
+
+	// log the status
+	pro.sup.Log().Debugf("current price of %s is %0.8f (%0.4f%%)", pro.cfg.Symbol, price, pct)
 
 	// is the delta over the barrier
 	if pct >= pro.cfg.WriteBarrierPct {
