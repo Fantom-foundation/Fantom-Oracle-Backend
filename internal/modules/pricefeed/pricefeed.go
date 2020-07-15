@@ -79,7 +79,7 @@ func (pro *PriceOracle) Terminate() {
 // Run starts the price feed oracle business.
 func (pro *PriceOracle) Run() {
 	// log we are done
-	pro.sup.Log().Noticef("starting %s oracle", pro.cfg.Name)
+	pro.sup.Log().Noticef("starting %s oracle for token [%s]", pro.cfg.Name, pro.cfg.Token.String())
 
 	// get the current price and round so we know how to proceed
 	pro.init()
