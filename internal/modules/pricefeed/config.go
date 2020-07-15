@@ -13,10 +13,12 @@ import (
 type PriceOracleConfig struct {
 	Name            string         `json:"name"`
 	Symbol          string         `json:"symbol"`
+	Decimals        uint32         `json:"decimals"`
 	ApiUrl          string         `json:"api_point"`
 	ApiKey          string         `json:"api_key"`
 	ApiSecret       string         `json:"api_secret"`
-	Contract        common.Address `json:"contract"`
+	Token           common.Address `json:"token"`
+	PriceAggregate  common.Address `json:"aggregate"`
 	KeyStore        string         `json:"keystore"`
 	KeySecret       string         `json:"key_secret"`
 	PullDelayMs     int64          `json:"pull_delay_milliseconds"`

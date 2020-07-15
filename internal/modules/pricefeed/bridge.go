@@ -27,7 +27,7 @@ var (
 )
 
 // PriceFeedContractABI is the input ABI used to generate the binding from.
-const PriceFeedContractABI = "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"feeds\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"symbol\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"name\":\"PriceChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPeriod\",\"type\":\"uint256\"}],\"name\":\"PriceExpirationPeriodChanged\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"addSource\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"expiration\",\"type\":\"uint256\"}],\"name\":\"changeExpirationPeriod\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"dropSource\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"symbol\",\"type\":\"bytes32\"}],\"name\":\"getPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"priceExpirationPeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"prices\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"updated\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"symbol\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"newPrice\",\"type\":\"uint256\"}],\"name\":\"setPrice\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"sources\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const PriceFeedContractABI = "[{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"int256\",\"name\":\"current\",\"type\":\"int256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"roundId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"AnswerUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"roundId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"startedBy\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startedAt\",\"type\":\"uint256\"}],\"name\":\"NewRound\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"source\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timeStamp\",\"type\":\"uint256\"}],\"name\":\"SourceAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"source\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timeStamp\",\"type\":\"uint256\"}],\"name\":\"SourceDropped\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"addSource\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"dropSource\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"roundId\",\"type\":\"uint256\"}],\"name\":\"getAnswer\",\"outputs\":[{\"internalType\":\"int256\",\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"roundId\",\"type\":\"uint256\"}],\"name\":\"getTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"latestAnswer\",\"outputs\":[{\"internalType\":\"int256\",\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"latestRound\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"latestTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"sources\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_round\",\"type\":\"uint256\"},{\"internalType\":\"int256\",\"name\":\"_value\",\"type\":\"int256\"},{\"internalType\":\"uint256\",\"name\":\"_stamp\",\"type\":\"uint256\"}],\"name\":\"updateAnswer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // PriceFeedContract is an auto generated Go binding around an Ethereum contract.
 type PriceFeedContract struct {
@@ -171,30 +171,134 @@ func (_PriceFeedContract *PriceFeedContractTransactorRaw) Transact(opts *bind.Tr
 	return _PriceFeedContract.Contract.contract.Transact(opts, method, params...)
 }
 
-// GetPrice is a free data retrieval call binding the contract method 0x31d98b3f.
+// GetAnswer is a free data retrieval call binding the contract method 0xb5ab58dc.
 //
-// Solidity: function getPrice(bytes32 symbol) view returns(uint256)
-func (_PriceFeedContract *PriceFeedContractCaller) GetPrice(opts *bind.CallOpts, symbol [32]byte) (*big.Int, error) {
+// Solidity: function getAnswer(uint256 roundId) view returns(int256)
+func (_PriceFeedContract *PriceFeedContractCaller) GetAnswer(opts *bind.CallOpts, roundId *big.Int) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
 	)
 	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "getPrice", symbol)
+	err := _PriceFeedContract.contract.Call(opts, out, "getAnswer", roundId)
 	return *ret0, err
 }
 
-// GetPrice is a free data retrieval call binding the contract method 0x31d98b3f.
+// GetAnswer is a free data retrieval call binding the contract method 0xb5ab58dc.
 //
-// Solidity: function getPrice(bytes32 symbol) view returns(uint256)
-func (_PriceFeedContract *PriceFeedContractSession) GetPrice(symbol [32]byte) (*big.Int, error) {
-	return _PriceFeedContract.Contract.GetPrice(&_PriceFeedContract.CallOpts, symbol)
+// Solidity: function getAnswer(uint256 roundId) view returns(int256)
+func (_PriceFeedContract *PriceFeedContractSession) GetAnswer(roundId *big.Int) (*big.Int, error) {
+	return _PriceFeedContract.Contract.GetAnswer(&_PriceFeedContract.CallOpts, roundId)
 }
 
-// GetPrice is a free data retrieval call binding the contract method 0x31d98b3f.
+// GetAnswer is a free data retrieval call binding the contract method 0xb5ab58dc.
 //
-// Solidity: function getPrice(bytes32 symbol) view returns(uint256)
-func (_PriceFeedContract *PriceFeedContractCallerSession) GetPrice(symbol [32]byte) (*big.Int, error) {
-	return _PriceFeedContract.Contract.GetPrice(&_PriceFeedContract.CallOpts, symbol)
+// Solidity: function getAnswer(uint256 roundId) view returns(int256)
+func (_PriceFeedContract *PriceFeedContractCallerSession) GetAnswer(roundId *big.Int) (*big.Int, error) {
+	return _PriceFeedContract.Contract.GetAnswer(&_PriceFeedContract.CallOpts, roundId)
+}
+
+// GetTimestamp is a free data retrieval call binding the contract method 0xb633620c.
+//
+// Solidity: function getTimestamp(uint256 roundId) view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractCaller) GetTimestamp(opts *bind.CallOpts, roundId *big.Int) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _PriceFeedContract.contract.Call(opts, out, "getTimestamp", roundId)
+	return *ret0, err
+}
+
+// GetTimestamp is a free data retrieval call binding the contract method 0xb633620c.
+//
+// Solidity: function getTimestamp(uint256 roundId) view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractSession) GetTimestamp(roundId *big.Int) (*big.Int, error) {
+	return _PriceFeedContract.Contract.GetTimestamp(&_PriceFeedContract.CallOpts, roundId)
+}
+
+// GetTimestamp is a free data retrieval call binding the contract method 0xb633620c.
+//
+// Solidity: function getTimestamp(uint256 roundId) view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractCallerSession) GetTimestamp(roundId *big.Int) (*big.Int, error) {
+	return _PriceFeedContract.Contract.GetTimestamp(&_PriceFeedContract.CallOpts, roundId)
+}
+
+// LatestAnswer is a free data retrieval call binding the contract method 0x50d25bcd.
+//
+// Solidity: function latestAnswer() view returns(int256)
+func (_PriceFeedContract *PriceFeedContractCaller) LatestAnswer(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _PriceFeedContract.contract.Call(opts, out, "latestAnswer")
+	return *ret0, err
+}
+
+// LatestAnswer is a free data retrieval call binding the contract method 0x50d25bcd.
+//
+// Solidity: function latestAnswer() view returns(int256)
+func (_PriceFeedContract *PriceFeedContractSession) LatestAnswer() (*big.Int, error) {
+	return _PriceFeedContract.Contract.LatestAnswer(&_PriceFeedContract.CallOpts)
+}
+
+// LatestAnswer is a free data retrieval call binding the contract method 0x50d25bcd.
+//
+// Solidity: function latestAnswer() view returns(int256)
+func (_PriceFeedContract *PriceFeedContractCallerSession) LatestAnswer() (*big.Int, error) {
+	return _PriceFeedContract.Contract.LatestAnswer(&_PriceFeedContract.CallOpts)
+}
+
+// LatestRound is a free data retrieval call binding the contract method 0x668a0f02.
+//
+// Solidity: function latestRound() view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractCaller) LatestRound(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _PriceFeedContract.contract.Call(opts, out, "latestRound")
+	return *ret0, err
+}
+
+// LatestRound is a free data retrieval call binding the contract method 0x668a0f02.
+//
+// Solidity: function latestRound() view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractSession) LatestRound() (*big.Int, error) {
+	return _PriceFeedContract.Contract.LatestRound(&_PriceFeedContract.CallOpts)
+}
+
+// LatestRound is a free data retrieval call binding the contract method 0x668a0f02.
+//
+// Solidity: function latestRound() view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractCallerSession) LatestRound() (*big.Int, error) {
+	return _PriceFeedContract.Contract.LatestRound(&_PriceFeedContract.CallOpts)
+}
+
+// LatestTimestamp is a free data retrieval call binding the contract method 0x8205bf6a.
+//
+// Solidity: function latestTimestamp() view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractCaller) LatestTimestamp(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _PriceFeedContract.contract.Call(opts, out, "latestTimestamp")
+	return *ret0, err
+}
+
+// LatestTimestamp is a free data retrieval call binding the contract method 0x8205bf6a.
+//
+// Solidity: function latestTimestamp() view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractSession) LatestTimestamp() (*big.Int, error) {
+	return _PriceFeedContract.Contract.LatestTimestamp(&_PriceFeedContract.CallOpts)
+}
+
+// LatestTimestamp is a free data retrieval call binding the contract method 0x8205bf6a.
+//
+// Solidity: function latestTimestamp() view returns(uint256)
+func (_PriceFeedContract *PriceFeedContractCallerSession) LatestTimestamp() (*big.Int, error) {
+	return _PriceFeedContract.Contract.LatestTimestamp(&_PriceFeedContract.CallOpts)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -221,68 +325,6 @@ func (_PriceFeedContract *PriceFeedContractSession) Owner() (common.Address, err
 // Solidity: function owner() view returns(address)
 func (_PriceFeedContract *PriceFeedContractCallerSession) Owner() (common.Address, error) {
 	return _PriceFeedContract.Contract.Owner(&_PriceFeedContract.CallOpts)
-}
-
-// PriceExpirationPeriod is a free data retrieval call binding the contract method 0x125d088b.
-//
-// Solidity: function priceExpirationPeriod() view returns(uint256)
-func (_PriceFeedContract *PriceFeedContractCaller) PriceExpirationPeriod(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "priceExpirationPeriod")
-	return *ret0, err
-}
-
-// PriceExpirationPeriod is a free data retrieval call binding the contract method 0x125d088b.
-//
-// Solidity: function priceExpirationPeriod() view returns(uint256)
-func (_PriceFeedContract *PriceFeedContractSession) PriceExpirationPeriod() (*big.Int, error) {
-	return _PriceFeedContract.Contract.PriceExpirationPeriod(&_PriceFeedContract.CallOpts)
-}
-
-// PriceExpirationPeriod is a free data retrieval call binding the contract method 0x125d088b.
-//
-// Solidity: function priceExpirationPeriod() view returns(uint256)
-func (_PriceFeedContract *PriceFeedContractCallerSession) PriceExpirationPeriod() (*big.Int, error) {
-	return _PriceFeedContract.Contract.PriceExpirationPeriod(&_PriceFeedContract.CallOpts)
-}
-
-// Prices is a free data retrieval call binding the contract method 0x60846bc6.
-//
-// Solidity: function prices(bytes32 ) view returns(uint256 price, uint256 updated)
-func (_PriceFeedContract *PriceFeedContractCaller) Prices(opts *bind.CallOpts, arg0 [32]byte) (struct {
-	Price   *big.Int
-	Updated *big.Int
-}, error) {
-	ret := new(struct {
-		Price   *big.Int
-		Updated *big.Int
-	})
-	out := ret
-	err := _PriceFeedContract.contract.Call(opts, out, "prices", arg0)
-	return *ret, err
-}
-
-// Prices is a free data retrieval call binding the contract method 0x60846bc6.
-//
-// Solidity: function prices(bytes32 ) view returns(uint256 price, uint256 updated)
-func (_PriceFeedContract *PriceFeedContractSession) Prices(arg0 [32]byte) (struct {
-	Price   *big.Int
-	Updated *big.Int
-}, error) {
-	return _PriceFeedContract.Contract.Prices(&_PriceFeedContract.CallOpts, arg0)
-}
-
-// Prices is a free data retrieval call binding the contract method 0x60846bc6.
-//
-// Solidity: function prices(bytes32 ) view returns(uint256 price, uint256 updated)
-func (_PriceFeedContract *PriceFeedContractCallerSession) Prices(arg0 [32]byte) (struct {
-	Price   *big.Int
-	Updated *big.Int
-}, error) {
-	return _PriceFeedContract.Contract.Prices(&_PriceFeedContract.CallOpts, arg0)
 }
 
 // Sources is a free data retrieval call binding the contract method 0xb750bdde.
@@ -332,27 +374,6 @@ func (_PriceFeedContract *PriceFeedContractTransactorSession) AddSource(addr com
 	return _PriceFeedContract.Contract.AddSource(&_PriceFeedContract.TransactOpts, addr)
 }
 
-// ChangeExpirationPeriod is a paid mutator transaction binding the contract method 0x8ef314c6.
-//
-// Solidity: function changeExpirationPeriod(uint256 expiration) returns()
-func (_PriceFeedContract *PriceFeedContractTransactor) ChangeExpirationPeriod(opts *bind.TransactOpts, expiration *big.Int) (*types.Transaction, error) {
-	return _PriceFeedContract.contract.Transact(opts, "changeExpirationPeriod", expiration)
-}
-
-// ChangeExpirationPeriod is a paid mutator transaction binding the contract method 0x8ef314c6.
-//
-// Solidity: function changeExpirationPeriod(uint256 expiration) returns()
-func (_PriceFeedContract *PriceFeedContractSession) ChangeExpirationPeriod(expiration *big.Int) (*types.Transaction, error) {
-	return _PriceFeedContract.Contract.ChangeExpirationPeriod(&_PriceFeedContract.TransactOpts, expiration)
-}
-
-// ChangeExpirationPeriod is a paid mutator transaction binding the contract method 0x8ef314c6.
-//
-// Solidity: function changeExpirationPeriod(uint256 expiration) returns()
-func (_PriceFeedContract *PriceFeedContractTransactorSession) ChangeExpirationPeriod(expiration *big.Int) (*types.Transaction, error) {
-	return _PriceFeedContract.Contract.ChangeExpirationPeriod(&_PriceFeedContract.TransactOpts, expiration)
-}
-
 // DropSource is a paid mutator transaction binding the contract method 0xb98ffeb1.
 //
 // Solidity: function dropSource(address addr) returns()
@@ -374,30 +395,30 @@ func (_PriceFeedContract *PriceFeedContractTransactorSession) DropSource(addr co
 	return _PriceFeedContract.Contract.DropSource(&_PriceFeedContract.TransactOpts, addr)
 }
 
-// SetPrice is a paid mutator transaction binding the contract method 0x10d8d74d.
+// UpdateAnswer is a paid mutator transaction binding the contract method 0x0f7dbf0f.
 //
-// Solidity: function setPrice(bytes32 symbol, uint256 newPrice) returns()
-func (_PriceFeedContract *PriceFeedContractTransactor) SetPrice(opts *bind.TransactOpts, symbol [32]byte, newPrice *big.Int) (*types.Transaction, error) {
-	return _PriceFeedContract.contract.Transact(opts, "setPrice", symbol, newPrice)
+// Solidity: function updateAnswer(uint256 _round, int256 _value, uint256 _stamp) returns()
+func (_PriceFeedContract *PriceFeedContractTransactor) UpdateAnswer(opts *bind.TransactOpts, _round *big.Int, _value *big.Int, _stamp *big.Int) (*types.Transaction, error) {
+	return _PriceFeedContract.contract.Transact(opts, "updateAnswer", _round, _value, _stamp)
 }
 
-// SetPrice is a paid mutator transaction binding the contract method 0x10d8d74d.
+// UpdateAnswer is a paid mutator transaction binding the contract method 0x0f7dbf0f.
 //
-// Solidity: function setPrice(bytes32 symbol, uint256 newPrice) returns()
-func (_PriceFeedContract *PriceFeedContractSession) SetPrice(symbol [32]byte, newPrice *big.Int) (*types.Transaction, error) {
-	return _PriceFeedContract.Contract.SetPrice(&_PriceFeedContract.TransactOpts, symbol, newPrice)
+// Solidity: function updateAnswer(uint256 _round, int256 _value, uint256 _stamp) returns()
+func (_PriceFeedContract *PriceFeedContractSession) UpdateAnswer(_round *big.Int, _value *big.Int, _stamp *big.Int) (*types.Transaction, error) {
+	return _PriceFeedContract.Contract.UpdateAnswer(&_PriceFeedContract.TransactOpts, _round, _value, _stamp)
 }
 
-// SetPrice is a paid mutator transaction binding the contract method 0x10d8d74d.
+// UpdateAnswer is a paid mutator transaction binding the contract method 0x0f7dbf0f.
 //
-// Solidity: function setPrice(bytes32 symbol, uint256 newPrice) returns()
-func (_PriceFeedContract *PriceFeedContractTransactorSession) SetPrice(symbol [32]byte, newPrice *big.Int) (*types.Transaction, error) {
-	return _PriceFeedContract.Contract.SetPrice(&_PriceFeedContract.TransactOpts, symbol, newPrice)
+// Solidity: function updateAnswer(uint256 _round, int256 _value, uint256 _stamp) returns()
+func (_PriceFeedContract *PriceFeedContractTransactorSession) UpdateAnswer(_round *big.Int, _value *big.Int, _stamp *big.Int) (*types.Transaction, error) {
+	return _PriceFeedContract.Contract.UpdateAnswer(&_PriceFeedContract.TransactOpts, _round, _value, _stamp)
 }
 
-// PriceFeedContractPriceChangedIterator is returned from FilterPriceChanged and is used to iterate over the raw logs and unpacked data for PriceChanged events raised by the PriceFeedContract contract.
-type PriceFeedContractPriceChangedIterator struct {
-	Event *PriceFeedContractPriceChanged // Event containing the contract specifics and raw log
+// PriceFeedContractAnswerUpdatedIterator is returned from FilterAnswerUpdated and is used to iterate over the raw logs and unpacked data for AnswerUpdated events raised by the PriceFeedContract contract.
+type PriceFeedContractAnswerUpdatedIterator struct {
+	Event *PriceFeedContractAnswerUpdated // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -411,7 +432,7 @@ type PriceFeedContractPriceChangedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *PriceFeedContractPriceChangedIterator) Next() bool {
+func (it *PriceFeedContractAnswerUpdatedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -420,7 +441,7 @@ func (it *PriceFeedContractPriceChangedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(PriceFeedContractPriceChanged)
+			it.Event = new(PriceFeedContractAnswerUpdated)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -435,7 +456,7 @@ func (it *PriceFeedContractPriceChangedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(PriceFeedContractPriceChanged)
+		it.Event = new(PriceFeedContractAnswerUpdated)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -451,52 +472,61 @@ func (it *PriceFeedContractPriceChangedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *PriceFeedContractPriceChangedIterator) Error() error {
+func (it *PriceFeedContractAnswerUpdatedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *PriceFeedContractPriceChangedIterator) Close() error {
+func (it *PriceFeedContractAnswerUpdatedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// PriceFeedContractPriceChanged represents a PriceChanged event raised by the PriceFeedContract contract.
-type PriceFeedContractPriceChanged struct {
-	Symbol [32]byte
-	Price  *big.Int
-	Raw    types.Log // Blockchain specific contextual infos
+// PriceFeedContractAnswerUpdated represents a AnswerUpdated event raised by the PriceFeedContract contract.
+type PriceFeedContractAnswerUpdated struct {
+	Current   *big.Int
+	RoundId   *big.Int
+	Timestamp *big.Int
+	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterPriceChanged is a free log retrieval operation binding the contract event 0x6007aeeeb4a07f99c2208537b6cf8bf3710752ce9e7d85b7ab294174ba801545.
+// FilterAnswerUpdated is a free log retrieval operation binding the contract event 0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f.
 //
-// Solidity: event PriceChanged(bytes32 indexed symbol, uint256 price)
-func (_PriceFeedContract *PriceFeedContractFilterer) FilterPriceChanged(opts *bind.FilterOpts, symbol [][32]byte) (*PriceFeedContractPriceChangedIterator, error) {
+// Solidity: event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) FilterAnswerUpdated(opts *bind.FilterOpts, current []*big.Int, roundId []*big.Int) (*PriceFeedContractAnswerUpdatedIterator, error) {
 
-	var symbolRule []interface{}
-	for _, symbolItem := range symbol {
-		symbolRule = append(symbolRule, symbolItem)
+	var currentRule []interface{}
+	for _, currentItem := range current {
+		currentRule = append(currentRule, currentItem)
+	}
+	var roundIdRule []interface{}
+	for _, roundIdItem := range roundId {
+		roundIdRule = append(roundIdRule, roundIdItem)
 	}
 
-	logs, sub, err := _PriceFeedContract.contract.FilterLogs(opts, "PriceChanged", symbolRule)
+	logs, sub, err := _PriceFeedContract.contract.FilterLogs(opts, "AnswerUpdated", currentRule, roundIdRule)
 	if err != nil {
 		return nil, err
 	}
-	return &PriceFeedContractPriceChangedIterator{contract: _PriceFeedContract.contract, event: "PriceChanged", logs: logs, sub: sub}, nil
+	return &PriceFeedContractAnswerUpdatedIterator{contract: _PriceFeedContract.contract, event: "AnswerUpdated", logs: logs, sub: sub}, nil
 }
 
-// WatchPriceChanged is a free log subscription operation binding the contract event 0x6007aeeeb4a07f99c2208537b6cf8bf3710752ce9e7d85b7ab294174ba801545.
+// WatchAnswerUpdated is a free log subscription operation binding the contract event 0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f.
 //
-// Solidity: event PriceChanged(bytes32 indexed symbol, uint256 price)
-func (_PriceFeedContract *PriceFeedContractFilterer) WatchPriceChanged(opts *bind.WatchOpts, sink chan<- *PriceFeedContractPriceChanged, symbol [][32]byte) (event.Subscription, error) {
+// Solidity: event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) WatchAnswerUpdated(opts *bind.WatchOpts, sink chan<- *PriceFeedContractAnswerUpdated, current []*big.Int, roundId []*big.Int) (event.Subscription, error) {
 
-	var symbolRule []interface{}
-	for _, symbolItem := range symbol {
-		symbolRule = append(symbolRule, symbolItem)
+	var currentRule []interface{}
+	for _, currentItem := range current {
+		currentRule = append(currentRule, currentItem)
+	}
+	var roundIdRule []interface{}
+	for _, roundIdItem := range roundId {
+		roundIdRule = append(roundIdRule, roundIdItem)
 	}
 
-	logs, sub, err := _PriceFeedContract.contract.WatchLogs(opts, "PriceChanged", symbolRule)
+	logs, sub, err := _PriceFeedContract.contract.WatchLogs(opts, "AnswerUpdated", currentRule, roundIdRule)
 	if err != nil {
 		return nil, err
 	}
@@ -506,8 +536,8 @@ func (_PriceFeedContract *PriceFeedContractFilterer) WatchPriceChanged(opts *bin
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(PriceFeedContractPriceChanged)
-				if err := _PriceFeedContract.contract.UnpackLog(event, "PriceChanged", log); err != nil {
+				event := new(PriceFeedContractAnswerUpdated)
+				if err := _PriceFeedContract.contract.UnpackLog(event, "AnswerUpdated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -528,20 +558,20 @@ func (_PriceFeedContract *PriceFeedContractFilterer) WatchPriceChanged(opts *bin
 	}), nil
 }
 
-// ParsePriceChanged is a log parse operation binding the contract event 0x6007aeeeb4a07f99c2208537b6cf8bf3710752ce9e7d85b7ab294174ba801545.
+// ParseAnswerUpdated is a log parse operation binding the contract event 0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f.
 //
-// Solidity: event PriceChanged(bytes32 indexed symbol, uint256 price)
-func (_PriceFeedContract *PriceFeedContractFilterer) ParsePriceChanged(log types.Log) (*PriceFeedContractPriceChanged, error) {
-	event := new(PriceFeedContractPriceChanged)
-	if err := _PriceFeedContract.contract.UnpackLog(event, "PriceChanged", log); err != nil {
+// Solidity: event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) ParseAnswerUpdated(log types.Log) (*PriceFeedContractAnswerUpdated, error) {
+	event := new(PriceFeedContractAnswerUpdated)
+	if err := _PriceFeedContract.contract.UnpackLog(event, "AnswerUpdated", log); err != nil {
 		return nil, err
 	}
 	return event, nil
 }
 
-// PriceFeedContractPriceExpirationPeriodChangedIterator is returned from FilterPriceExpirationPeriodChanged and is used to iterate over the raw logs and unpacked data for PriceExpirationPeriodChanged events raised by the PriceFeedContract contract.
-type PriceFeedContractPriceExpirationPeriodChangedIterator struct {
-	Event *PriceFeedContractPriceExpirationPeriodChanged // Event containing the contract specifics and raw log
+// PriceFeedContractNewRoundIterator is returned from FilterNewRound and is used to iterate over the raw logs and unpacked data for NewRound events raised by the PriceFeedContract contract.
+type PriceFeedContractNewRoundIterator struct {
+	Event *PriceFeedContractNewRound // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -555,7 +585,7 @@ type PriceFeedContractPriceExpirationPeriodChangedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *PriceFeedContractPriceExpirationPeriodChangedIterator) Next() bool {
+func (it *PriceFeedContractNewRoundIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -564,7 +594,7 @@ func (it *PriceFeedContractPriceExpirationPeriodChangedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(PriceFeedContractPriceExpirationPeriodChanged)
+			it.Event = new(PriceFeedContractNewRound)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -579,7 +609,7 @@ func (it *PriceFeedContractPriceExpirationPeriodChangedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(PriceFeedContractPriceExpirationPeriodChanged)
+		it.Event = new(PriceFeedContractNewRound)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -595,41 +625,61 @@ func (it *PriceFeedContractPriceExpirationPeriodChangedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *PriceFeedContractPriceExpirationPeriodChangedIterator) Error() error {
+func (it *PriceFeedContractNewRoundIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *PriceFeedContractPriceExpirationPeriodChangedIterator) Close() error {
+func (it *PriceFeedContractNewRoundIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// PriceFeedContractPriceExpirationPeriodChanged represents a PriceExpirationPeriodChanged event raised by the PriceFeedContract contract.
-type PriceFeedContractPriceExpirationPeriodChanged struct {
-	NewPeriod *big.Int
+// PriceFeedContractNewRound represents a NewRound event raised by the PriceFeedContract contract.
+type PriceFeedContractNewRound struct {
+	RoundId   *big.Int
+	StartedBy common.Address
+	StartedAt *big.Int
 	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterPriceExpirationPeriodChanged is a free log retrieval operation binding the contract event 0x17f1771bfbf65f2f9f6890ae150425ce55886916bdfe0bed0e64ad65296759dd.
+// FilterNewRound is a free log retrieval operation binding the contract event 0x0109fc6f55cf40689f02fbaad7af7fe7bbac8a3d2186600afc7d3e10cac60271.
 //
-// Solidity: event PriceExpirationPeriodChanged(uint256 newPeriod)
-func (_PriceFeedContract *PriceFeedContractFilterer) FilterPriceExpirationPeriodChanged(opts *bind.FilterOpts) (*PriceFeedContractPriceExpirationPeriodChangedIterator, error) {
+// Solidity: event NewRound(uint256 indexed roundId, address indexed startedBy, uint256 startedAt)
+func (_PriceFeedContract *PriceFeedContractFilterer) FilterNewRound(opts *bind.FilterOpts, roundId []*big.Int, startedBy []common.Address) (*PriceFeedContractNewRoundIterator, error) {
 
-	logs, sub, err := _PriceFeedContract.contract.FilterLogs(opts, "PriceExpirationPeriodChanged")
+	var roundIdRule []interface{}
+	for _, roundIdItem := range roundId {
+		roundIdRule = append(roundIdRule, roundIdItem)
+	}
+	var startedByRule []interface{}
+	for _, startedByItem := range startedBy {
+		startedByRule = append(startedByRule, startedByItem)
+	}
+
+	logs, sub, err := _PriceFeedContract.contract.FilterLogs(opts, "NewRound", roundIdRule, startedByRule)
 	if err != nil {
 		return nil, err
 	}
-	return &PriceFeedContractPriceExpirationPeriodChangedIterator{contract: _PriceFeedContract.contract, event: "PriceExpirationPeriodChanged", logs: logs, sub: sub}, nil
+	return &PriceFeedContractNewRoundIterator{contract: _PriceFeedContract.contract, event: "NewRound", logs: logs, sub: sub}, nil
 }
 
-// WatchPriceExpirationPeriodChanged is a free log subscription operation binding the contract event 0x17f1771bfbf65f2f9f6890ae150425ce55886916bdfe0bed0e64ad65296759dd.
+// WatchNewRound is a free log subscription operation binding the contract event 0x0109fc6f55cf40689f02fbaad7af7fe7bbac8a3d2186600afc7d3e10cac60271.
 //
-// Solidity: event PriceExpirationPeriodChanged(uint256 newPeriod)
-func (_PriceFeedContract *PriceFeedContractFilterer) WatchPriceExpirationPeriodChanged(opts *bind.WatchOpts, sink chan<- *PriceFeedContractPriceExpirationPeriodChanged) (event.Subscription, error) {
+// Solidity: event NewRound(uint256 indexed roundId, address indexed startedBy, uint256 startedAt)
+func (_PriceFeedContract *PriceFeedContractFilterer) WatchNewRound(opts *bind.WatchOpts, sink chan<- *PriceFeedContractNewRound, roundId []*big.Int, startedBy []common.Address) (event.Subscription, error) {
 
-	logs, sub, err := _PriceFeedContract.contract.WatchLogs(opts, "PriceExpirationPeriodChanged")
+	var roundIdRule []interface{}
+	for _, roundIdItem := range roundId {
+		roundIdRule = append(roundIdRule, roundIdItem)
+	}
+	var startedByRule []interface{}
+	for _, startedByItem := range startedBy {
+		startedByRule = append(startedByRule, startedByItem)
+	}
+
+	logs, sub, err := _PriceFeedContract.contract.WatchLogs(opts, "NewRound", roundIdRule, startedByRule)
 	if err != nil {
 		return nil, err
 	}
@@ -639,8 +689,8 @@ func (_PriceFeedContract *PriceFeedContractFilterer) WatchPriceExpirationPeriodC
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(PriceFeedContractPriceExpirationPeriodChanged)
-				if err := _PriceFeedContract.contract.UnpackLog(event, "PriceExpirationPeriodChanged", log); err != nil {
+				event := new(PriceFeedContractNewRound)
+				if err := _PriceFeedContract.contract.UnpackLog(event, "NewRound", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -661,12 +711,280 @@ func (_PriceFeedContract *PriceFeedContractFilterer) WatchPriceExpirationPeriodC
 	}), nil
 }
 
-// ParsePriceExpirationPeriodChanged is a log parse operation binding the contract event 0x17f1771bfbf65f2f9f6890ae150425ce55886916bdfe0bed0e64ad65296759dd.
+// ParseNewRound is a log parse operation binding the contract event 0x0109fc6f55cf40689f02fbaad7af7fe7bbac8a3d2186600afc7d3e10cac60271.
 //
-// Solidity: event PriceExpirationPeriodChanged(uint256 newPeriod)
-func (_PriceFeedContract *PriceFeedContractFilterer) ParsePriceExpirationPeriodChanged(log types.Log) (*PriceFeedContractPriceExpirationPeriodChanged, error) {
-	event := new(PriceFeedContractPriceExpirationPeriodChanged)
-	if err := _PriceFeedContract.contract.UnpackLog(event, "PriceExpirationPeriodChanged", log); err != nil {
+// Solidity: event NewRound(uint256 indexed roundId, address indexed startedBy, uint256 startedAt)
+func (_PriceFeedContract *PriceFeedContractFilterer) ParseNewRound(log types.Log) (*PriceFeedContractNewRound, error) {
+	event := new(PriceFeedContractNewRound)
+	if err := _PriceFeedContract.contract.UnpackLog(event, "NewRound", log); err != nil {
+		return nil, err
+	}
+	return event, nil
+}
+
+// PriceFeedContractSourceAddedIterator is returned from FilterSourceAdded and is used to iterate over the raw logs and unpacked data for SourceAdded events raised by the PriceFeedContract contract.
+type PriceFeedContractSourceAddedIterator struct {
+	Event *PriceFeedContractSourceAdded // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *PriceFeedContractSourceAddedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(PriceFeedContractSourceAdded)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(PriceFeedContractSourceAdded)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *PriceFeedContractSourceAddedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *PriceFeedContractSourceAddedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// PriceFeedContractSourceAdded represents a SourceAdded event raised by the PriceFeedContract contract.
+type PriceFeedContractSourceAdded struct {
+	Source    common.Address
+	TimeStamp *big.Int
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterSourceAdded is a free log retrieval operation binding the contract event 0x4599483543f98164ba8860ed8115742ca9d0b29473d7c8f55c4e367a028d94a4.
+//
+// Solidity: event SourceAdded(address source, uint256 timeStamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) FilterSourceAdded(opts *bind.FilterOpts) (*PriceFeedContractSourceAddedIterator, error) {
+
+	logs, sub, err := _PriceFeedContract.contract.FilterLogs(opts, "SourceAdded")
+	if err != nil {
+		return nil, err
+	}
+	return &PriceFeedContractSourceAddedIterator{contract: _PriceFeedContract.contract, event: "SourceAdded", logs: logs, sub: sub}, nil
+}
+
+// WatchSourceAdded is a free log subscription operation binding the contract event 0x4599483543f98164ba8860ed8115742ca9d0b29473d7c8f55c4e367a028d94a4.
+//
+// Solidity: event SourceAdded(address source, uint256 timeStamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) WatchSourceAdded(opts *bind.WatchOpts, sink chan<- *PriceFeedContractSourceAdded) (event.Subscription, error) {
+
+	logs, sub, err := _PriceFeedContract.contract.WatchLogs(opts, "SourceAdded")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(PriceFeedContractSourceAdded)
+				if err := _PriceFeedContract.contract.UnpackLog(event, "SourceAdded", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseSourceAdded is a log parse operation binding the contract event 0x4599483543f98164ba8860ed8115742ca9d0b29473d7c8f55c4e367a028d94a4.
+//
+// Solidity: event SourceAdded(address source, uint256 timeStamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) ParseSourceAdded(log types.Log) (*PriceFeedContractSourceAdded, error) {
+	event := new(PriceFeedContractSourceAdded)
+	if err := _PriceFeedContract.contract.UnpackLog(event, "SourceAdded", log); err != nil {
+		return nil, err
+	}
+	return event, nil
+}
+
+// PriceFeedContractSourceDroppedIterator is returned from FilterSourceDropped and is used to iterate over the raw logs and unpacked data for SourceDropped events raised by the PriceFeedContract contract.
+type PriceFeedContractSourceDroppedIterator struct {
+	Event *PriceFeedContractSourceDropped // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *PriceFeedContractSourceDroppedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(PriceFeedContractSourceDropped)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(PriceFeedContractSourceDropped)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *PriceFeedContractSourceDroppedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *PriceFeedContractSourceDroppedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// PriceFeedContractSourceDropped represents a SourceDropped event raised by the PriceFeedContract contract.
+type PriceFeedContractSourceDropped struct {
+	Source    common.Address
+	TimeStamp *big.Int
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterSourceDropped is a free log retrieval operation binding the contract event 0x311f8a5f5a633747dc3f0b1f43ae5bdd2d3ba73f0faaab6a8a0b9fd63a784152.
+//
+// Solidity: event SourceDropped(address source, uint256 timeStamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) FilterSourceDropped(opts *bind.FilterOpts) (*PriceFeedContractSourceDroppedIterator, error) {
+
+	logs, sub, err := _PriceFeedContract.contract.FilterLogs(opts, "SourceDropped")
+	if err != nil {
+		return nil, err
+	}
+	return &PriceFeedContractSourceDroppedIterator{contract: _PriceFeedContract.contract, event: "SourceDropped", logs: logs, sub: sub}, nil
+}
+
+// WatchSourceDropped is a free log subscription operation binding the contract event 0x311f8a5f5a633747dc3f0b1f43ae5bdd2d3ba73f0faaab6a8a0b9fd63a784152.
+//
+// Solidity: event SourceDropped(address source, uint256 timeStamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) WatchSourceDropped(opts *bind.WatchOpts, sink chan<- *PriceFeedContractSourceDropped) (event.Subscription, error) {
+
+	logs, sub, err := _PriceFeedContract.contract.WatchLogs(opts, "SourceDropped")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(PriceFeedContractSourceDropped)
+				if err := _PriceFeedContract.contract.UnpackLog(event, "SourceDropped", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseSourceDropped is a log parse operation binding the contract event 0x311f8a5f5a633747dc3f0b1f43ae5bdd2d3ba73f0faaab6a8a0b9fd63a784152.
+//
+// Solidity: event SourceDropped(address source, uint256 timeStamp)
+func (_PriceFeedContract *PriceFeedContractFilterer) ParseSourceDropped(log types.Log) (*PriceFeedContractSourceDropped, error) {
+	event := new(PriceFeedContractSourceDropped)
+	if err := _PriceFeedContract.contract.UnpackLog(event, "SourceDropped", log); err != nil {
 		return nil, err
 	}
 	return event, nil
