@@ -194,6 +194,9 @@ func (uo *UniswapOracle) updateOracle(contract *UniswapOracleContract) error {
 		return err
 	}
 
+	// set the gas limit appropriate for the operation
+	sig.GasLimit = 600000
+
 	// call the update on contract
 	tx, err := contract.Update(sig)
 	if err != nil {
