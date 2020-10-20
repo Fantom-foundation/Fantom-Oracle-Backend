@@ -7,6 +7,7 @@ import (
 	"oracle-watchdog/internal/config"
 	"oracle-watchdog/internal/modules/ballot"
 	"oracle-watchdog/internal/modules/pricefeed"
+	"oracle-watchdog/internal/modules/unioracle"
 	"oracle-watchdog/internal/supervisor"
 )
 
@@ -30,6 +31,8 @@ func loadOracles(cfg *config.Cfg, sup supervisor.Supervisor) error {
 			_, err = ballot.New(&mc, sup)
 		case "pricefeed":
 			_, err = pricefeed.New(&mc, sup)
+		case "unioracle":
+			_, err = unioracle.New(&mc, sup)
 		}
 
 		// is the module loaded?

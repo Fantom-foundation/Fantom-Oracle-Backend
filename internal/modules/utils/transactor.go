@@ -39,6 +39,9 @@ func Transactor(log logger.Logger, keyStore *string, keySecret *string) (*bind.T
 	// assign some predefined constants
 	tr.GasLimit = transactionsGasLimit
 
+	// log transaction signer
+	log.Debugf("using %s signing key", tr.From.String())
+
 	// return the transactor
 	return tr, nil
 }

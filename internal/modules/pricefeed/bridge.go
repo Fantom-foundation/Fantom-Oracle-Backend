@@ -137,7 +137,7 @@ func bindPriceFeedContract(address common.Address, caller bind.ContractCaller, t
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_PriceFeedContract *PriceFeedContractRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_PriceFeedContract *PriceFeedContractRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _PriceFeedContract.Contract.PriceFeedContractCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -156,7 +156,7 @@ func (_PriceFeedContract *PriceFeedContractRaw) Transact(opts *bind.TransactOpts
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_PriceFeedContract *PriceFeedContractCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_PriceFeedContract *PriceFeedContractCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _PriceFeedContract.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -175,12 +175,17 @@ func (_PriceFeedContract *PriceFeedContractTransactorRaw) Transact(opts *bind.Tr
 //
 // Solidity: function getAnswer(uint256 roundId) view returns(int256)
 func (_PriceFeedContract *PriceFeedContractCaller) GetAnswer(opts *bind.CallOpts, roundId *big.Int) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "getAnswer", roundId)
-	return *ret0, err
+	var out []interface{}
+	err := _PriceFeedContract.contract.Call(opts, &out, "getAnswer", roundId)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // GetAnswer is a free data retrieval call binding the contract method 0xb5ab58dc.
@@ -201,12 +206,17 @@ func (_PriceFeedContract *PriceFeedContractCallerSession) GetAnswer(roundId *big
 //
 // Solidity: function getTimestamp(uint256 roundId) view returns(uint256)
 func (_PriceFeedContract *PriceFeedContractCaller) GetTimestamp(opts *bind.CallOpts, roundId *big.Int) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "getTimestamp", roundId)
-	return *ret0, err
+	var out []interface{}
+	err := _PriceFeedContract.contract.Call(opts, &out, "getTimestamp", roundId)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // GetTimestamp is a free data retrieval call binding the contract method 0xb633620c.
@@ -227,12 +237,17 @@ func (_PriceFeedContract *PriceFeedContractCallerSession) GetTimestamp(roundId *
 //
 // Solidity: function latestAnswer() view returns(int256)
 func (_PriceFeedContract *PriceFeedContractCaller) LatestAnswer(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "latestAnswer")
-	return *ret0, err
+	var out []interface{}
+	err := _PriceFeedContract.contract.Call(opts, &out, "latestAnswer")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // LatestAnswer is a free data retrieval call binding the contract method 0x50d25bcd.
@@ -253,12 +268,17 @@ func (_PriceFeedContract *PriceFeedContractCallerSession) LatestAnswer() (*big.I
 //
 // Solidity: function latestRound() view returns(uint256)
 func (_PriceFeedContract *PriceFeedContractCaller) LatestRound(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "latestRound")
-	return *ret0, err
+	var out []interface{}
+	err := _PriceFeedContract.contract.Call(opts, &out, "latestRound")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // LatestRound is a free data retrieval call binding the contract method 0x668a0f02.
@@ -279,12 +299,17 @@ func (_PriceFeedContract *PriceFeedContractCallerSession) LatestRound() (*big.In
 //
 // Solidity: function latestTimestamp() view returns(uint256)
 func (_PriceFeedContract *PriceFeedContractCaller) LatestTimestamp(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "latestTimestamp")
-	return *ret0, err
+	var out []interface{}
+	err := _PriceFeedContract.contract.Call(opts, &out, "latestTimestamp")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // LatestTimestamp is a free data retrieval call binding the contract method 0x8205bf6a.
@@ -305,12 +330,17 @@ func (_PriceFeedContract *PriceFeedContractCallerSession) LatestTimestamp() (*bi
 //
 // Solidity: function owner() view returns(address)
 func (_PriceFeedContract *PriceFeedContractCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "owner")
-	return *ret0, err
+	var out []interface{}
+	err := _PriceFeedContract.contract.Call(opts, &out, "owner")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -331,12 +361,17 @@ func (_PriceFeedContract *PriceFeedContractCallerSession) Owner() (common.Addres
 //
 // Solidity: function sources(address ) view returns(bool)
 func (_PriceFeedContract *PriceFeedContractCaller) Sources(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _PriceFeedContract.contract.Call(opts, out, "sources", arg0)
-	return *ret0, err
+	var out []interface{}
+	err := _PriceFeedContract.contract.Call(opts, &out, "sources", arg0)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
 }
 
 // Sources is a free data retrieval call binding the contract method 0xb750bdde.

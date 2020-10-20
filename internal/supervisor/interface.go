@@ -3,7 +3,10 @@
 package supervisor
 
 import (
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rpc"
+	"math/big"
 	"oracle-watchdog/internal/logger"
 )
 
@@ -33,6 +36,12 @@ type Supervisor interface {
 	// Lachesis returns an established and valid lachesis node connection
 	// if possible, or nil if the connection is not available.
 	Lachesis() *rpc.Client
+
+	// BlockHeight returns the current block height of the Opera blockchain.
+	BlockHeight() (*big.Int, error)
+
+	// ContractCallOpts provides call options if possible
+	ContractCallOpts(common.Address) *bind.CallOpts
 }
 
 // Oracle defines the interface for an oracle module supervised
